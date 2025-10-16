@@ -1,0 +1,153 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Support Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #4285f4;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        .chat-messages {
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .language-section {
+            margin-bottom: 15px;
+        }
+        .language-title {
+            font-weight: bold;
+            color: #4285f4;
+            margin-bottom: 5px;
+        }
+        .message-container {
+            display: flex;
+            margin: 5px 0;
+        }
+        .bot-message {
+            background: #eef;
+            padding: 8px 12px;
+            border-radius: 18px;
+            max-width: 70%;
+            margin-right: auto;
+        }
+        .user-message {
+            background: #4285f4;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 18px;
+            max-width: 70%;
+            margin-left: auto;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Customer Support</h1>
+        </div>
+        <div class="language-selector">
+            <select id="language">
+                <option value="English">English</option>
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="German">German</option>
+                <option value="Chinese">Chinese</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Russian">Russian</option>
+                <option value="Arabic">Arabic</option>
+            </select>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="chat-input">
+		<form id = "chat-form">
+            		<input type="text" id="user-input" placeholder="Type your message here..." required>
+            		<button type = "submit">Send</button>
+		</form>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function addMessage(message, isUser) {
+                const messageDiv = $('<div>').addClass('message').addClass(isUser ? 'user-message' : 'bot-message').text(message);
+                $('#chat-messages').append(messageDiv);
+                $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+            }
+
+            $('#chat-form').on('submit', function(e) {
+                e.preventDefault();
+                const userInput = $('#user-input').val();
+                const selectedLanguage = $('#language').val();
+                
+                if (userInput.trim() === '') return;
+                
+                addMessage(userInput, true);
+                $('#user-input').val('');
+
+                $.ajax({
+                    url: '/chat',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ 
+                        message: userInput, 
+                        language: selectedLanguage 
+                    }),
+                    success: function(response) {
+                        addMessage(response.response, false);
+                    },
+                    error: function() {
+                        addMessage('Error communicating with the server.', false);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
